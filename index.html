@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de QR Code SNCF</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+       :root {
+    --sncf-blue: #003b6f;
+    --sncf-red: #E2001A;
+    --sncf-gray-light: #F4F4F4;
+    --sncf-gray-dark: #333333;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: var(--sncf-gray-light);
+    color: var(--sncf-blue);
+    line-height: 1.6;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-container {
+    width: 95%;
+    max-width: 1000px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 59, 111, 0.1);
+    padding: 2rem;
+    text-align: center;
+}
+
+.qr-content-wrapper {
+    display: flex;
+    gap: 2rem;
+}
+
+.qr-input-section, 
+.qr-display-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.qr-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.qr-header img {
+    height: 50px;
+    margin-right: 1rem;
+}
+
+.qr-header h1 {
+    color: var(--sncf-red);
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.qr-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.qr-input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--sncf-blue);
+    font-weight: bold;
+}
+
+.qr-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--sncf-blue);
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.qr-input:focus {
+    outline: none;
+    border-color: var(--sncf-red);
+}
+
+.qr-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--sncf-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.qr-button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+.qr-button:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--sncf-blue) 80%, white);
+}
+
+.qr-code-display {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+    border: 2px dashed var(--sncf-blue);
+    border-radius: 12px;
+}
+
+.qr-code-display img {
+    max-width: 100%;
+    max-height: 250px;
+}
+
+.qr-footer {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--sncf-gray-dark);
+    text-align: center;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.qr-code-display img {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Mode paysage et tablette */
+@media screen and (max-width: 1024px) and (orientation: landscape) {
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .qr-container {
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .qr-content-wrapper {
+        flex-grow: 1;
+        overflow: auto;
+    }
+
+    .qr-header {
+        margin-bottom: 1rem;
+    }
+
+    .qr-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Responsive pour écrans plus petits */
+@media (max-width: 768px) {
+    .qr-content-wrapper {
+        flex-direction: column;
+    }
+
+    .qr-header h1 {
+        font-size: 1.5rem;
+    }
+}
+    </style>
+    <link rel="icon" href="sncflogo.png">
+</head>
+<body>
+    <div class="qr-container">
+        <div class="qr-header">
+            <img src="sncflogo.png" alt="Logo SNCF">
+            <h1>Générateur de QR Code</h1>
+        </div>
+
+        <div class="qr-input-group">
+            <label for="identifiant">Identifiant</label>
+            <input 
+                type="text" 
+                id="identifiant" 
+                class="qr-input" 
+                placeholder="Entrez votre identifiant SNCF"
+            >
+        </div>
+
+        <button id="generateBtn" class="qr-button">
+            Générer QR Code
+        </button>
+
+        <div id="qrCodeContainer" class="qr-code-display">
+            <p>Votre QR Code apparaîtra ici</p>
+        </div>
+
+        <div class="qr-footer">
+            © 2025 SNCF
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const identifiant = document.getElementById('identifiant').value;
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            
+            if (identifiant) {
+                qrCodeContainer.innerHTML = ''; // Clear previous QR code
+                
+                const qr = qrcode(0, 'M');
+                qr.addData(identifiant);
+                qr.make();
+                
+                const imgTag = qr.createImgTag(5);
+                qrCodeContainer.innerHTML = imgTag;
+            } else {
+                qrCodeContainer.innerHTML = '<p class="text-red-500">Veuillez entrer un identifiant</p>';
+            }
+        });
+    </script>
+</body>
+</html>
